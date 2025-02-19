@@ -6,7 +6,7 @@ Flask-SQLAlchemy==3.1.1
 Flask-WTF==1.2.2
 Jinja2==3.1.5
 MarkupSafe==3.0.2
-SALAlchemy==2.0.37
+SALAlchemy==2.0.30
 WTForms==3.2.1
 Werkzeug==3.1.3
 bleach==6.2.0
