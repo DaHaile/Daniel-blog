@@ -1,0 +1,41 @@
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+<!-- Navigation-->
+{% include "header.html" %}
+<!-- Page Header-->
+
+<header class="masthead" style="background-image: url({{url_for('static', filename='/assets/img/about-bg2.jpg')}})">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="site-heading">
+                    {% if is_edit %}
+                        <h1>Edit Post</h1>
+                    {% else %}
+                        <h1>New Post</h1>
+                    {% endif %}
+                    <span class="subheading">You are going to make a great post</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Post Content-->
+<div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+                 <!--  Load ckeditor-->
+                {{ ckeditor.load() }}
+
+                <!-- Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor.-->
+                {{ ckeditor.config(name='body') }}
+
+                <!-- Add WTF quickform-->
+                {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+        </div>
+    </div>
+</div>
+<!-- Footer-->
+{%include "footer.html"%}

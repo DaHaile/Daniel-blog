@@ -1,0 +1,104 @@
+<!-- Navigation-->
+{% include "header.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+<!-- Page Header-->
+<header class="masthead" style="background-image: url({{post.img_url}})">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="post-heading">
+                    <h1>{{ post.title}}</h1>
+                    <h2 class="subheading">{{ post.subtitle }}</h2>
+                    <span class="meta">
+                        Posted by
+                        <a href="#!">{{ post.author.name }}</a>
+                        on {{post.date}}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- Post Content-->
+<article class="mb-4">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <p>{{ post.body | safe }}</p>
+
+
+<!-- Comment Section Start -->
+    <!-- Collapse Toggle Button -->
+    <a class="btn" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#commentSection">
+        <i class="fa-solid fa-comments" style="color:#0085a1;"></i> <span id="commentCount">{{ post.comments|length }}</span> Comments
+    </a>
+
+    <!-- Collapsible Comment Section -->
+    <div class="collapse mt-3" id="commentSection">
+        <div class="card card-body">
+            {% for comment in post.comments %}
+            <div class="d-flex align-items-start border-bottom pb-2 mb-2">
+                <!-- User Circle -->
+                <div class="user-circle text-white bg-primary d-flex justify-content-center align-items-center rounded-circle me-2" style="width: 30px; height: 30px; font-weight: bold;">
+                    {{ comment.comment_author.name[0].upper() }}
+                </div>
+
+                <!-- Name & Date (Stacked) -->
+                <div class="d-flex flex-column grid gap-0">
+                    <strong>{{ comment.comment_author.name }}</strong>
+                    <small class="text-muted" style="font-size:0.75rem;">{{ comment.comment_date }}</small>
+                    <span class="ms-2 flex-grow-1">{{ comment.text | striptags }}</span>
+                </div>
+
+                <!-- Comment Text (Aligned Horizontally) <p class="">{{ comment.text|safe }}</p>-->
+
+            </div>
+             {% endfor %}
+        </div>
+    </div>
+
+<!-- Comment Section End -->
+
+
+
+                 <hr>
+        {% if current_user.id == 1 %}
+           <div class="clearfix">
+                <a class="btn btn-primary float-right" href="{{url_for('edit_post', post_id=post.id)}}">Edit Post</a>
+           </div>
+        {% endif %}
+     <a class="btn" href="#" role="button" data-bs-toggle="collapse" data-bs-target="#writeComment">
+        <i class="fa-solid fa-comments" style="color:#0085a1;"></i> <span >Write a comment</span>
+    </a>
+        <div class="collapse mt-3" id="writeComment">
+                {{ ckeditor.load() }}
+            {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "btn btn-primary my-2"}) }}
+        </div>
+                </div>
+        </div>
+    </div>
+
+
+
+        <!-- this is
+
+
+        <div class="col-lg-8 col-md-10 mx-auto comment">
+                    {% for comment in post.comments: %}
+                    <ul type="none">
+                        <li>
+                            <div class="user-circle">
+                                {{comment_author[0].upper() }}
+                            </div>
+                            <div style="margin:0; padding:0;">
+                                {{comment.text|safe}}
+                                <span class="date sub-text">{{comment.comment_author.name}}</span>
+                            </div>
+                        </li>
+                    </ul>
+                    {% endfor %}
+                </div>
+                -->
+</article>
+<!-- Footer-->
+{%include "footer.html"%}

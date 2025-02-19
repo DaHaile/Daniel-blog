@@ -1,0 +1,42 @@
+<!-- Navigation-->
+{% include "header.html" %}
+<!-- Page header -->
+<header class="masthead" style="background-image: url({{url_for('static', filename='/assets/img/'+filename)}})">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="site-heading">
+                    <h1>{{heading}}</h1>
+                    <span class="subheading">{{head_text}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+        <!-- Main Content-->
+        <main class="mb-4">
+            <div class="container px-4 px-lg-5">
+                <div class="row gx-4 gx-lg-5 justify-content-center">
+                    <div class="col-md-10 col-lg-8 col-xl-7">
+                        <h3>Hello, and welcome to my blog!</h3>
+                        <p>I am Daniel Adane, the voice behind this blog, where i share my thoughts, ideas, and insights on technology. This space is where i explore my passions and connect with readers like you.</p>
+                        <h3>Who Am I?</h3>
+                        <p>I'm a web developer, python programmer and graphic designer, passionate about the technology. I've always enjoyed writing
+                        a way to express my thoughts, share experiences, and learn along the way. Weather it's delving into the latest tech trends,
+                        offering tips for new technology products or sharing personal stories, i aim to create content that informs,inspires and engages.</p>
+                        <h3>Why I Started This Blog?</h3>
+                        <p>This blog began as a way for me to share my experiences, offer useful tips and explore my creativity. Over time, it has grown into
+                        a platform where i can connect with others who share similar interests and passions.</p>
+                        <h3>What You'll Find Here</h3>
+                        <p>On this blog, you'll find posts about the latest in technology. My goal is to provide you with content that is both useful and
+                        enjoyable to read, with a focus on quality and authenticity.</p>
+                        <h3>Let's Connect</h3>
+                        <p>I believe in the power of conversation, so i'd love to hear your thoughts on my posts. Feel free to <a href="/register"><em>sign up</em></a> and see the posts that i made and leave a comment, reach out to
+                        me through the <a href="/contact"><em>contact</em></a> form. I'm always open to new ideas and discussions.</p>
+                        <p>Thank you for visiting my blog, I'm excited to have you here!</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+<!-- Footer-->
+{%include "footer.html"%}
