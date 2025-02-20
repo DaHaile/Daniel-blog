@@ -32,7 +32,7 @@
                     <a href="/about">{{ post.author.name }}</a>
                     on {{ post.date }}
                     {% if current_user.id == 1 %}
-                    <a href="{{url_for('delete_post', post_id=post.id)}}" style="color:red;">✘</a>
+                    <a href="{{url_for('delete_post', post_id=post.id)}}" style="color:red;" onclick="return confirmDelete()">✘</a>
                     {% endif %}
                 </p>
             </div>
@@ -50,4 +50,5 @@
 {% endif %}
 <!-- Footer-->
 {%include "footer.html"%}
+
 

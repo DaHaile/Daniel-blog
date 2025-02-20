@@ -138,6 +138,7 @@ def show_post(post_id):
         )
         db.session.add(new_comment)
         db.session.commit()
+        return redirect(url_for("show_post", post_id=post_id))
     return render_template("post.html",
                            form=form,
                            post=requested_post,
@@ -163,23 +164,11 @@ def receive_message():
             connection.starttls()
             connection.login(user=email_sender, password=password_sender)
             connection.send_message(msg)
-        print("Message sent successfully!")
-        return render_template("form.html", heading="Message sent successfully!",
-                               head_text="Have a question?/ I have answer",
-                               filename="contact-bg2.jpg",
-                               is_contact=True,
-                               logged_in=current_user.is_authenticated,
-                               form=CreateContactForm(),
-                               form_type="contact_form")
+        flash("Message sent successfully!")
+        return redirect(url_for("contact"))
     except Exception as e:
-        print(f"An error occurred: {e}")
-        return render_template("form.html", heading="Unfortunately your message is not sent! please fill the form again!",
-                           head_text="Have a question?/ I have answer",
-                           filename= "contact-bg2.jpg",
-                           is_contact=True,
-                           logged_in=current_user.is_authenticated,
-                           form=CreateContactForm(),
-                           form_type = "contact_form")
+        flash(f"An error occurred: {e}")
+        return redirect(url_for("contact"))
 
 @app.route("/new-post", methods=["GET", "POST"])
 @login_required
@@ -227,14 +216,18 @@ def edit_post(post_id):
                            is_edit=True,
                            logged_in=current_user.is_authenticated)
 
-@app.route("/delete/<int:post_id>")
+@app.route("/delete/<int:post_id>", methods=["GET", "POST"])
 @login_required
 @admin_only
 def delete_post(post_id):
     post = db.session.query(Post).filter(Post.id == post_id).first()
-    db.session.delete(post)
-    db.session.commit()
-    return redirect(url_for("home"))
+    if not post:
+        flash("Post not found!")
+        return redirect("home")
+    if request.method == "POST":
+        db.session.delete(post)
+        db.session.commit()
+        return redirect(url_for("home"))
 
 @app.route("/register", methods=["GET","POST"])
 def register():

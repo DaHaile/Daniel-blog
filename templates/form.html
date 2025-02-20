@@ -36,7 +36,11 @@
                     {% with messages = get_flashed_messages() %}
                          {% if messages %}
                             {% for message in messages %}
-                                <p style="color:red;"> {{message}}</p>
+                                {% if "sent" in message %}
+                                    <p style="color:green;"> {{message}}</p>
+                                {% else %}
+                                    <p style="color:red;"> {{message}}</p>
+                                {% endif %}
                             {% endfor %}
                         {% endif %}
                     {% endwith %}

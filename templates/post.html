@@ -59,8 +59,6 @@
 
 <!-- Comment Section End -->
 
-
-
                  <hr>
         {% if current_user.id == 1 %}
            <div class="clearfix">
@@ -78,27 +76,6 @@
         </div>
     </div>
 
-
-
-        <!-- this is
-
-
-        <div class="col-lg-8 col-md-10 mx-auto comment">
-                    {% for comment in post.comments: %}
-                    <ul type="none">
-                        <li>
-                            <div class="user-circle">
-                                {{comment_author[0].upper() }}
-                            </div>
-                            <div style="margin:0; padding:0;">
-                                {{comment.text|safe}}
-                                <span class="date sub-text">{{comment.comment_author.name}}</span>
-                            </div>
-                        </li>
-                    </ul>
-                    {% endfor %}
-                </div>
-                -->
 </article>
 <!-- Footer-->
 {%include "footer.html"%}
