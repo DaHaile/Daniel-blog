@@ -14,7 +14,6 @@ from forms import CreateContactForm,CreatePostForm,CreateRegistrationForm,LoginF
 import bleach
 
 
-ALLOWED_TAGS = ["h1","h2","h3","h4","h5","h6","b","em","li","ul","ol","strong","p","sub","sup"]
 
 email_sender = os.environ.get("EMAIL")
 email_receiver = os.environ.get("EMAIL_REC")
@@ -27,7 +26,7 @@ Bootstrap(app)
 
 
 #Creating database
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///blog.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///blog.db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -207,7 +206,7 @@ def edit_post(post_id):
         post.title = request.form.get("title")
         post.subtitle = request.form.get("subtitle")
         post.author = request.form.get("author")
-        post.body = bleach.clean(request.form.get("body"), tags=ALLOWED_TAGS, attributes={})
+        post.body =request.form.get("body"),
         post.img_url = request.form.get("img_url")
         db.session.commit()
         return redirect(url_for("show_post", post_id=post_id))
