@@ -32,19 +32,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:/
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)  # Initialize Flask-Migrate
-print(os.environ.get("DATABASE_URL"))
 
-import psycopg2
-import os
-
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
-try:
-    connection = psycopg2.connect(DATABASE_URL)
-    print("Successfully connected to the PostgreSQL database.")
-    connection.close()
-except Exception as e:
-    print(f"Error: {e}")
 
 
 login_manager = LoginManager()
