@@ -2,6 +2,7 @@ from functools import wraps
 from flask import Flask, render_template, request, url_for, flash, redirect, abort
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from sqlalchemy.orm import relationship
 import smtplib
 from email.message import EmailMessage
@@ -12,8 +13,9 @@ from flask_login import UserMixin,login_user,login_required, LoginManager, curre
 from flask_ckeditor import CKEditor
 from forms import CreateContactForm,CreatePostForm,CreateRegistrationForm,LoginForm,CreateCommentForm
 import bleach
+from dotenv import load_dotenv
 
-
+load_dotenv()
 
 email_sender = os.environ.get("EMAIL")
 email_receiver = os.environ.get("EMAIL_REC")
@@ -26,9 +28,23 @@ Bootstrap(app)
 
 
 #Creating database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///blog.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///blog.db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)  # Initialize Flask-Migrate
+print(os.environ.get("DATABASE_URL"))
+
+import psycopg2
+import os
+
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+try:
+    connection = psycopg2.connect(DATABASE_URL)
+    print("Successfully connected to the PostgreSQL database.")
+    connection.close()
+except Exception as e:
+    print(f"Error: {e}")
 
 
 login_manager = LoginManager()
@@ -81,6 +97,15 @@ class Comment(db.Model):
 
 with app.app_context():
     db.create_all()
+
+import sqlite3
+
+conn = sqlite3.connect("blog.db")
+with open("dump.sql", "w") as f:
+    for line in conn.iterdump():
+        f.write(f"{line}\n")
+conn.close()
+print("Database dump created successfully!")
 
 def admin_only(f):
     @wraps(f)
