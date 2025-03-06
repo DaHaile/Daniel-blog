@@ -155,7 +155,7 @@ def show_post(post_id):
                            logged_in=current_user.is_authenticated,
                            )
 
-@app.route("/add_comment/<int:post_id", methods=["GET", "POST"])
+@app.route("/add_comment/<int:post_id>", methods=["GET", "POST"])
 @limiter.limit("3 per minute")
 def add_comment(post_id):
     requested_post = db.session.query(Post).filter(Post.id == post_id).first()
