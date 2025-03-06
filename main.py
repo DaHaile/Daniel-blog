@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-
+from random import randint
 
 
 load_dotenv()
@@ -47,6 +47,9 @@ login_manager = LoginManager()
 login_manager.init_app(app=app)
 login_manager.login_view= "login"
 
+
+def generate_otp():
+    return randint()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -260,7 +263,7 @@ def delete_post(post_id):
         db.session.commit()
         return redirect(url_for("home"))
 
-@app.route("delete/<int:post_id>/<int:comment_id>", methods=["GET","POST"])
+@app.route("/delete/<int:post_id>/<int:comment_id>", methods=["GET","POST"])
 @login_required
 def delete_comment(post_id,comment_id):
     comment = db.session.query(Comment).filter(Comment.id == comment_id).first()
