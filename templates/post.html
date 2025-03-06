@@ -48,6 +48,9 @@
                     <strong>{{ comment.comment_author.name }}</strong>
                     <small class="text-muted" style="font-size:0.75rem;">{{ comment.comment_date }}</small>
                     <span class="ms-2 flex-grow-1">{{ comment.text | striptags }}</span>
+                    {% if logged_in and comment.comment_author.id == current_user.id %}
+                    <a href="{{url_for('delete_comment', comment_id=comment.id, post_id=post.id)}}" style="color:red;" onclick="return confirmDelete()">✘</a>
+                    {% endif %}
                 </div>
 
                 <!-- Comment Text (Aligned Horizontally) <p class="">{{ comment.text|safe }}</p>-->
@@ -69,8 +72,10 @@
         <i class="fa-solid fa-comments" style="color:#0085a1;"></i> <span >Write a comment</span>
     </a>
         <div class="collapse mt-3" id="writeComment">
+            <form action="{{url_for('add_comment', post_id=post.id)}}" method="post">
                 {{ ckeditor.load() }}
             {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "btn btn-primary my-2"}) }}
+            </form>
         </div>
                 </div>
         </div>

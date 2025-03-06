@@ -14,6 +14,11 @@ from flask_ckeditor import CKEditor
 from forms import CreateContactForm,CreatePostForm,CreateRegistrationForm,LoginForm,CreateCommentForm
 import bleach
 from dotenv import load_dotenv
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+
 
 load_dotenv()
 
@@ -25,6 +30,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET")
 ckeditor = CKEditor(app)
 Bootstrap(app)
+csrf = CSRFProtect(app)
+limiter = Limiter(get_remote_address, app=app, default_limits=["5 per minute"])
+
 
 
 #Creating database
@@ -71,7 +79,7 @@ class Post(db.Model):
 
     comments = relationship("Comment", back_populates="parent_post")
 
-
+allowed_tags = ['b', 'i', 'u', 'strong', 'em', 'p']
 class Comment(db.Model):
     __tablename__ = "comments"
     id = db.Column(db.Integer, primary_key=True)
@@ -82,6 +90,9 @@ class Comment(db.Model):
     parent_post= relationship("Post", back_populates="comments")
     text = db.Column(db.String, nullable=False)
 
+    def set_text(self, raw_text):
+        self.text = bleach.clean(raw_text, tags=allowed_tags)
+
 
 with app.app_context():
     db.create_all()
@@ -89,9 +100,9 @@ with app.app_context():
 import sqlite3
 
 conn = sqlite3.connect("blog.db")
-with open("dump.sql", "w") as f:
+with open("dump.sql", "w") as file:
     for line in conn.iterdump():
-        f.write(f"{line}\n")
+        file.write(f"{line}\n")
 conn.close()
 print("Database dump created successfully!")
 
@@ -138,25 +149,33 @@ def contact():
 def show_post(post_id):
     requested_post = db.session.query(Post).filter(Post.id == post_id).first()
     form= CreateCommentForm()
-    if form.validate_on_submit():
-        if not current_user.is_authenticated:
-            flash("You need to login or register to comment")
-            return redirect(url_for("login"))
-        new_comment = Comment(
-            text= request.form.get("comment_text"),
-            comment_author=current_user,
-            parent_post=requested_post,
-            comment_date = datetime.today().strftime("%b %d, %Y"),
-        )
-        db.session.add(new_comment)
-        db.session.commit()
-        return redirect(url_for("show_post", post_id=post_id))
     return render_template("post.html",
                            form=form,
                            post=requested_post,
                            logged_in=current_user.is_authenticated,
-                           comment_author=current_user.name,
                            )
+
+@app.route("/add_comment/<int:post_id", methods=["GET", "POST"])
+@limiter.limit("3 per minute")
+def add_comment(post_id):
+    requested_post = db.session.query(Post).filter(Post.id == post_id).first()
+    if request.method == "POST":
+        if not current_user.is_authenticated:
+            flash("You need to login or register to comment")
+            return redirect(url_for("login"))
+        comment_text = request.form.get("comment_text")
+        if len(comment_text) < 3:
+            flash("Your comment is to short")
+        else:
+            new_comment = Comment(
+                text= comment_text,
+                comment_author=current_user,
+                parent_post=requested_post,
+                comment_date = datetime.today().strftime("%b %d, %Y"),
+            )
+            db.session.add(new_comment)
+            db.session.commit()
+            return redirect(url_for("show_post", post_id=post_id))
 
 @app.route("/form-entry", methods=["post"])
 @login_required
@@ -240,6 +259,18 @@ def delete_post(post_id):
         db.session.delete(post)
         db.session.commit()
         return redirect(url_for("home"))
+
+@app.route("delete/<int:post_id>/<int:comment_id>", methods=["GET","POST"])
+@login_required
+def delete_comment(post_id,comment_id):
+    comment = db.session.query(Comment).filter(Comment.id == comment_id).first()
+    if not comment:
+        flash("Comment not found!")
+        return redirect(url_for("show_post", post_id=post_id ))
+    if request.method == "POST":
+        db.session.delete(comment)
+        db.session.commit()
+        return redirect(url_for("show_post", post_id=post_id))
 
 @app.route("/register", methods=["GET","POST"])
 def register():

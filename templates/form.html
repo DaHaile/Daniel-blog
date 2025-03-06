@@ -46,7 +46,7 @@
                     {% endwith %}
                     <form action="{{form_action}}" method="post" id="{{form_id}}" data-sb-form-api-token="API_TOKEN">
                          {{ form.hidden_tag() }}
-                         {{ wtf.quick_form(form, button_map={"submit": "btn btn-primary my-2"}) }}
+                         {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "btn btn-primary my-2"}) }}
                     </form>
                 </div>
             </div>
