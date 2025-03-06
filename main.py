@@ -332,7 +332,7 @@ def register():
         body = f"""{datetime.now().strftime('%M %d,%Y')}
                         
         Hello {name}
-        
+    
         You are receiving this email because a request was made for a one-time code that can be used for
         authentication for Daniel's Blog account creation.
         
