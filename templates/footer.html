@@ -42,5 +42,24 @@ function confirmDelete() {
     return confirm("Are you sure you want to delete this post? This action cannot be undone.");
 }
 </script>
+<script>
+let timeLeft = 600;
+let timerDisplay = document.getElementById("timer");
+
+function updateTimer() {
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+    timerDisplay.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+    if (timeLeft > 0) {
+        timeLeft--;
+        setTimeout(updateTimer, 1000);
+    } else {
+        alert("OTP expired!");
+        window.location.href = "/register";
+    }
+}
+
+updateTimer();
+</script>
 </body>
 </html>

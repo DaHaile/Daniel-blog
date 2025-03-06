@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import Flask, render_template, request, url_for, flash, redirect, abort
+from flask import Flask, render_template, request, url_for, flash, redirect, abort, session
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -7,11 +7,11 @@ from sqlalchemy.orm import relationship
 import smtplib
 from email.message import EmailMessage
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin,login_user,login_required, LoginManager, current_user,logout_user
 from flask_ckeditor import CKEditor
-from forms import CreateContactForm,CreatePostForm,CreateRegistrationForm,LoginForm,CreateCommentForm
+from forms import CreateContactForm,CreatePostForm,CreateRegistrationForm,LoginForm,CreateCommentForm,CreateOtpForm
 import bleach
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
@@ -49,7 +49,13 @@ login_manager.login_view= "login"
 
 
 def generate_otp():
-    return randint()
+    otp = randint(100000,999999)
+    expiry_time = datetime.now() + timedelta(minutes=10)
+    session["otp"] = otp
+    session['otp_expiry'] = expiry_time.strftime("%Y-%m-%d %H:%M:%S")
+    return otp
+
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -257,7 +263,7 @@ def delete_post(post_id):
     post = db.session.query(Post).filter(Post.id == post_id).first()
     if not post:
         flash("Post not found!")
-        return redirect("home")
+        return redirect(url_for("home"))
     if request.method == "POST":
         db.session.delete(post)
         db.session.commit()
@@ -270,10 +276,42 @@ def delete_comment(post_id,comment_id):
     if not comment:
         flash("Comment not found!")
         return redirect(url_for("show_post", post_id=post_id ))
-    if request.method == "POST":
-        db.session.delete(comment)
-        db.session.commit()
-        return redirect(url_for("show_post", post_id=post_id))
+    db.session.delete(comment)
+    db.session.commit()
+    return redirect(url_for("show_post", post_id=post_id))
+
+
+@app.route("/otp_authentication")
+def verify_otp(user_email,user_password,user_name):
+    form=CreateOtpForm()
+    stored_otp = session.get("otp")
+    if form.validate_on_submit():
+        user_otp = request.form.get("otp")
+        if stored_otp == user_otp:
+            hash_and_salted_password = generate_password_hash(
+                user_password,
+                method='pbkdf2:sha256',
+                salt_length=8,
+            )
+            new_user = User(
+                name=user_name,
+                password=hash_and_salted_password,
+                email=user_email
+            )
+            db.session.add(new_user)
+            db.session.commit()
+            login_user(new_user)
+            return redirect(url_for("home"))
+        else:
+            flash("You enter wrong otp, please try again!")
+            return redirect(url_for("register"))
+    return render_template("form.html", heading="Register",
+                           head_text="Start contributing to the blog",
+                           filename="register-bg.jpg",
+                           is_contact = False,
+                           logged_in=current_user.is_authenticated,
+                           form=form,
+                           form_type="otp")
 
 @app.route("/register", methods=["GET","POST"])
 def register():
@@ -282,20 +320,29 @@ def register():
         if User.query.filter_by(email=request.form.get("email")).first():
             flash("You've already signed up with that email, login instead")
             return redirect(url_for("login"))
-        hash_and_salted_password = generate_password_hash(
-            request.form.get("password"),
-            method='pbkdf2:sha256',
-            salt_length=8,
-        )
-        new_user = User(
-            name=request.form.get("name"),
-            password=hash_and_salted_password,
-            email=request.form.get("email")
-        )
-        db.session.add(new_user)
-        db.session.commit()
-        login_user(new_user)
-        return redirect(url_for("home"))
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        # send otp to check if the email is correct
+        otp = generate_otp()
+        msg = EmailMessage()
+        msg["From"] = email_sender
+        msg["To"] = email
+        msg["Subject"] = "Daniel's blog OTP request"
+        msg.set_content(f"{datetime.now().strftime("%M %d,%Y")}\n Hello {name}\n You are receiving this email because a request was"
+                        f"made for a one-time code that can be used for authentication for Daniel's Blog account creation.\n"
+                        f"The one time verification code provided below is valid for 10 minutes.\n please enter the following code for verification.\n\n{otp}")
+        try:
+            with smtplib.SMTP("smtp.mail.yahoo.com", 587) as connection:
+                connection.ehlo()
+                connection.starttls()
+                connection.login(user=email_sender, password=password_sender)
+                connection.send_message(msg)
+            flash("Message sent successfully!")
+            return redirect(url_for("verify_otp", user_name= name, user_password = password, user_email=email))
+        except Exception as e:
+            flash(f"An error occurred: {e}")
+            return redirect(url_for("register"))
     return render_template("form.html", heading="Register",
                            head_text="Start contributing to the blog",
                            filename="register-bg.jpg",

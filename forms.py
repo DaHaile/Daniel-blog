@@ -37,3 +37,7 @@ class LoginForm(FlaskForm):
 class CreateCommentForm(FlaskForm):
     comment_text = CKEditorField("Comment", validators=[InputRequired("Please enter your comment!")])
     submit = SubmitField("Submit Comment")
+
+class CreateOtpForm(FlaskForm):
+    otp = StringField("OTP", validators=[InputRequired("Please enter your OTP from your email!")])
+    submit = SubmitField("Submit")

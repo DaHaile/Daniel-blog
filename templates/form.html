@@ -29,6 +29,9 @@
                     {% elif form_type == "login" %}
                         {% set form_action = "/login" %}
                         {% set form_id = "loginForm" %}
+                    {% elif form_type == "otp" %}
+                        {% set form_action = "/otp_authentication" %}
+                        {% set form_id = "otpForm" %}
                     {% else %}
                         {% set form_action = "/register" %}
                         {% set form_id = "registerForm" %}
@@ -46,6 +49,9 @@
                     {% endwith %}
                     <form action="{{form_action}}" method="post" id="{{form_id}}" data-sb-form-api-token="API_TOKEN">
                          {{ form.hidden_tag() }}
+                        {% if form_type == "otp" %}
+                            <p id="countdown">OTP expires in <span id="timer">10:00</span> minutes</p>
+                        {% endif %}
                          {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "btn btn-primary my-2"}) }}
                     </form>
                 </div>
