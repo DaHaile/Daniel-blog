@@ -329,9 +329,25 @@ def register():
         msg["From"] = email_sender
         msg["To"] = email
         msg["Subject"] = "Daniel's blog OTP request"
-        msg.set_content(f"{datetime.now().strftime('%M %d,%Y')}\n Hello {name}\n You are receiving this email because a request was"
-                        f"made for a one-time code that can be used for authentication for Daniel's Blog account creation.\n"
-                        f"The one time verification code provided below is valid for 10 minutes.\n please enter the following code for verification.\n\n{otp}")
+        body = f"""{datetime.now().strftime('%M %d,%Y')}
+                        
+        Hello {name}
+        
+        You are receiving this email because a request was made for a one-time code that can be used for
+        authentication for Daniel's Blog account creation.
+        
+        The one time verification code provided below is valid for 10 minutes.
+        
+        please enter the following code for verification.
+        
+        
+        {otp}
+       
+        
+        please do not reply!
+        
+        """
+        msg.set_content(body)
         try:
             with smtplib.SMTP("smtp.mail.yahoo.com", 587) as connection:
                 connection.ehlo()
