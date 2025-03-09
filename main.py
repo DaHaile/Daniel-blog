@@ -284,8 +284,8 @@ def delete_comment(post_id,comment_id):
 @app.route("/otp_authentication/<user_email>/<user_password>/<user_name>", methods=["GET","POST"])
 def verify_otp(user_email,user_password,user_name):
     form=CreateOtpForm()
-    stored_otp = session.get("otp")
     if form.validate_on_submit():
+        stored_otp = session.get("otp")
         user_otp = request.form.get("otp")
         if stored_otp == user_otp:
             hash_and_salted_password = generate_password_hash(
