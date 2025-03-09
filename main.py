@@ -51,7 +51,7 @@ login_manager.login_view= "login"
 def generate_otp():
     otp = randint(100000,999999)
     expiry_time = datetime.now() + timedelta(minutes=10)
-    session["otp"] = otp
+    session["otp"] = int(otp)
     session['otp_expiry'] = expiry_time.strftime("%Y-%m-%d %H:%M:%S")
     return otp
 
@@ -286,13 +286,21 @@ def verify_otp():
     form=CreateOtpForm()
     if form.validate_on_submit():
         stored_otp = session.get("otp")
+        expire_otp = session.get("otp_expiry")
+        expiry_otp = datetime.strptime(expire_otp,"%Y-%m-%d %H:%M:%S")
         user_otp = request.form.get("otp")
-        if stored_otp is None:
+        if stored_otp is None or not expire_otp:
             flash("OTP expired or missing. Please request a new one.")
             return redirect(url_for("register"))
         if not user_otp or not user_otp.isdigit():
             flash("Invalid OTP. Please enter a numeric value.")
             return redirect(url_for("verify_otp"))
+        if datetime.now() > expiry_otp:
+            session.pop("otp", None)
+            session.pop("otp_expiry", None)
+            flash("OTP has expired, please request a new one by entering your information again!")
+            return redirect(url_for("register"))
+
         if stored_otp == user_otp:
             hash_and_salted_password = generate_password_hash(
                 session.get("user_password"),
@@ -310,7 +318,7 @@ def verify_otp():
             return redirect(url_for("home"))
         else:
             flash("You enter wrong otp, please try again!")
-            return redirect(url_for("register"))
+            return redirect(url_for("verify_otp"))
     return render_template("form.html", heading="Register",
                            head_text="Start contributing to the blog",
                            filename="register-bg.jpg",
