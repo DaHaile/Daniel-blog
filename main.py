@@ -281,22 +281,28 @@ def delete_comment(post_id,comment_id):
     return redirect(url_for("show_post", post_id=post_id))
 
 
-@app.route("/otp_authentication/<user_email>/<user_password>/<user_name>", methods=["GET","POST"])
-def verify_otp(user_email,user_password,user_name):
+@app.route("/otp_authentication", methods=["GET","POST"])
+def verify_otp():
     form=CreateOtpForm()
     if form.validate_on_submit():
         stored_otp = session.get("otp")
         user_otp = request.form.get("otp")
+        if stored_otp is None:
+            flash("OTP expired or missing. Please request a new one.")
+            return redirect(url_for("register"))
+        if not user_otp or not user_otp.isdigit():
+            flash("Invalid OTP. Please enter a numeric value.")
+            return redirect(url_for("verify_otp"))
         if stored_otp == user_otp:
             hash_and_salted_password = generate_password_hash(
-                user_password,
+                session.get("user_password"),
                 method='pbkdf2:sha256',
                 salt_length=8,
             )
             new_user = User(
-                name=user_name,
+                name=session.get("user_name"),
                 password=hash_and_salted_password,
-                email=user_email
+                email=session.get("user_email")
             )
             db.session.add(new_user)
             db.session.commit()
