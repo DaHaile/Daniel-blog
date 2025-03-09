@@ -281,7 +281,7 @@ def delete_comment(post_id,comment_id):
     return redirect(url_for("show_post", post_id=post_id))
 
 
-@app.route("/otp_authentication")
+@app.route("/otp_authentication/<user_email>/<user_password>/<user_name>", methods=["GET","POST"])
 def verify_otp(user_email,user_password,user_name):
     form=CreateOtpForm()
     stored_otp = session.get("otp")
@@ -329,22 +329,22 @@ def register():
         msg["From"] = email_sender
         msg["To"] = email
         msg["Subject"] = "Daniel's blog OTP request"
-        body = f"""{datetime.now().strftime('%M %d,%Y')}
+        body = f"""{datetime.now().strftime('%B %d,%Y')}
                         
-        Hello {name}
-    
-        You are receiving this email because a request was made for a one-time code that can be used for
-        authentication for Daniel's Blog account creation.
-        
-        The one time verification code provided below is valid for 10 minutes.
-        
-        please enter the following code for verification.
-        
-        
-        {otp}
-       
-        
-        please do not reply!
+Hello {name}
+
+You are receiving this email because a request was made for a one-time code that can be used for
+authentication for Daniel's Blog account creation.
+
+The one time verification code provided below is valid for 10 minutes.
+
+please enter the following code for verification.
+
+
+{otp}
+
+
+please do not reply!
         
         """
         msg.set_content(body)
