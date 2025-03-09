@@ -51,7 +51,7 @@ login_manager.login_view= "login"
 def generate_otp():
     otp = randint(100000,999999)
     expiry_time = datetime.now() + timedelta(minutes=10)
-    session["otp"] = int(otp)
+    session["otp"] = str(otp)
     session['otp_expiry'] = expiry_time.strftime("%Y-%m-%d %H:%M:%S")
     return otp
 
@@ -301,7 +301,7 @@ def verify_otp():
             flash("OTP has expired, please request a new one by entering your information again!")
             return redirect(url_for("register"))
 
-        if stored_otp == user_otp:
+        if stored_otp == str(user_otp):
             hash_and_salted_password = generate_password_hash(
                 session.get("user_password"),
                 method='pbkdf2:sha256',
