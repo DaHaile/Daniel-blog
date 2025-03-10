@@ -315,6 +315,9 @@ def verify_otp():
             db.session.add(new_user)
             db.session.commit()
             login_user(new_user)
+            session.pop("user_name",None)
+            session.pop("user_email", None)
+            session.pop("user_password", None)
             return redirect(url_for("home"))
         else:
             flash("You enter wrong otp, please try again!")
@@ -334,18 +337,22 @@ def register():
         if User.query.filter_by(email=request.form.get("email")).first():
             flash("You've already signed up with that email, login instead")
             return redirect(url_for("login"))
-        name = request.form.get("name")
-        email = request.form.get("email")
-        password = request.form.get("password")
+        user_name = request.form.get("name")
+        user_email = request.form.get("email")
+        user_password= request.form.get("password")
+        session["user_name"] = user_name
+        session["user_email"] = user_email
+        session["user_password"] = user_password
+
         # send otp to check if the email is correct
         otp = generate_otp()
         msg = EmailMessage()
         msg["From"] = email_sender
-        msg["To"] = email
+        msg["To"] = user_email
         msg["Subject"] = "Daniel's blog OTP request"
         body = f"""{datetime.now().strftime('%B %d,%Y')}
                         
-Hello {name}
+Hello {user_name}
 
 You are receiving this email because a request was made for a one-time code that can be used for
 authentication for Daniel's Blog account creation.
@@ -369,7 +376,7 @@ please do not reply!
                 connection.login(user=email_sender, password=password_sender)
                 connection.send_message(msg)
             flash("Message sent successfully!")
-            return redirect(url_for("verify_otp", user_name= name, user_password = password, user_email=email))
+            return redirect(url_for("verify_otp"))
         except Exception as e:
             flash(f"An error occurred: {e}")
             return redirect(url_for("register"))
